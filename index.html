@@ -1029,22 +1029,28 @@ function submitEmail(){
   window._userEmail = email;
   window._userName  = name;
 
-  // Submit to Tally form
-  const formData = new FormData();
-  formData.append('fields[name]', name);
-  formData.append('fields[email]', email);
-  // Also pass the archetype result once calculated
+  // Calculate archetype first
   const t={coverup:0,crisis:0,conscious:0,change:0};
   Object.values(answers).forEach(a=>{ if(a?.a) t[a.a]++; });
   const winner=Object.entries(t).sort((a,b)=>b[1]-a[1])[0][0];
   const archetypeNames={coverup:'Identity Cover-Up',crisis:'Identity Crisis',conscious:'Identity Conscious',change:'Identity Change'};
-  formData.append('fields[archetype]', archetypeNames[winner]);
+  const archetypeResult = archetypeNames[winner];
 
-  fetch('https://tally.so/r/obVqAO', {
-    method: 'POST',
-    body: formData,
-    mode: 'no-cors'
-  }).catch(()=>{}); // silent fail — results still show
+  // Submit to Tally via hidden iframe
+  try {
+    const params = new URLSearchParams({
+      'name': name,
+      'email': email,
+      'archetype': archetypeResult
+    });
+    const iframe = document.createElement('iframe');
+    iframe.style.display = 'none';
+    iframe.src = 'https://tally.so/r/obVqAO?' + params.toString();
+    document.body.appendChild(iframe);
+    setTimeout(() => { 
+      if(iframe.parentNode) iframe.parentNode.removeChild(iframe); 
+    }, 5000);
+  } catch(e) {}
 
   showResults();
 }
