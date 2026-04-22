@@ -1036,21 +1036,12 @@ function submitEmail(){
   const archetypeNames={coverup:'Identity Cover-Up',crisis:'Identity Crisis',conscious:'Identity Conscious',change:'Identity Change'};
   const archetypeResult = archetypeNames[winner];
 
-  // Submit to Tally via hidden iframe
-  try {
-    const params = new URLSearchParams({
-      'name': name,
-      'email': email,
-      'archetype': archetypeResult
-    });
-    const iframe = document.createElement('iframe');
-    iframe.style.display = 'none';
-    iframe.src = 'https://tally.so/r/obVqAO?' + params.toString();
-    document.body.appendChild(iframe);
-    setTimeout(() => { 
-      if(iframe.parentNode) iframe.parentNode.removeChild(iframe); 
-    }, 5000);
-  } catch(e) {}
+  // Submit to Formspree
+  fetch('https://formspree.io/f/mvzdwbde', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+    body: JSON.stringify({ name, email, archetype: archetypeResult })
+  }).catch(()=>{});
 
   showResults();
 }
