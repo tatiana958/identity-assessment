@@ -1059,10 +1059,32 @@ function restart(){
 }
 
 function shareResult(){
-  const title=document.getElementById('r-title').textContent;
-  const text=`I just discovered my Identity Archetype: ${title}. Take the assessment to discover yours!`;
-  if(navigator.share){ navigator.share({title:'My Identity Archetype',text}); }
-  else { navigator.clipboard.writeText(text).then(()=>alert('Copied to clipboard!')); }
+  const title = document.getElementById('r-title').textContent;
+  const url   = window.location.href;
+  const text  = `I just discovered my Identity Archetype: ${title}. Take the assessment to discover yours! ${url}`;
+
+  if(navigator.share){
+    // Mobile native share
+    navigator.share({ title: 'My Identity Archetype', text, url })
+      .catch(()=>{});
+  } else {
+    // Desktop fallback — copy to clipboard and show a nice tooltip
+    navigator.clipboard.writeText(text).then(()=>{
+      const btn = document.querySelector('.btn-outline');
+      const orig = btn.textContent;
+      btn.textContent = '✓ Link Copied!';
+      btn.style.background = 'var(--forest)';
+      btn.style.color = 'var(--blush-lt)';
+      setTimeout(()=>{
+        btn.textContent = orig;
+        btn.style.background = '';
+        btn.style.color = '';
+      }, 2500);
+    }).catch(()=>{
+      // Final fallback — prompt with text to copy
+      window.prompt('Copy this link to share your result:', text);
+    });
+  }
 }
 </script>
 </body>
